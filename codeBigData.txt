@@ -1,0 +1,109 @@
+val reviewDataset = spark.read.json("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/yelp_academic_dataset_review.json")
+reviewDataset.createOrReplaceTempView("reviews")
+val optimize_reviews = spark.sql("SELECT user_id,business_id,stars FROM reviews")
+val userDataset = spark.read.json("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/yelp_academic_dataset_user.json")
+userDataset.createOrReplaceTempView("users")
+val optimize_users = spark.sql("SELECT user_id FROM users")
+val businessDataset = spark.read.json("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/yelp_academic_dataset_business.json")
+businessDataset.createOrReplaceTempView("business")
+val optimize_business = spark.sql("SELECT business_id FROM business")
+case class review_row(user_id: String, business_id: String, stars: Long)
+val reviews = optimize_reviews.map(r=>review_row(r.getString(0),r.getString(1),r.getLong(2)))
+val optimize_business_rdd = optimize_business.rdd.map(x => x(0).toString()).distinct().zipWithIndex()
+val optimize_users_rdd = optimize_users.rdd.map(x => x(0).toString()).distinct().zipWithIndex()
+val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd)
+val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._2._2,r._2._1.business_id,r._2._1.stars))
+val joinBusiness = joinUser.keyBy(_._2).join(optimize_business_rdd)
+val joinBusiness = joinUser.keyBy(_._2).join(optimize_business_rdd).map(r=>(r._2._1._1,r._2._2,r._2._1._3))
+
+
+import org.apache.spark.mllib.recommendation.ALS
+import org.apache.spark.mllib.recommendation.MatrixFactorizationModel
+import org.apache.spark.mllib.recommendation.Rating
+val rank = 10
+val numIterations = 10
+val ratings = joinBusiness.map(r => Rating(r._1.toInt, r._2.toInt, r._3.toDouble))
+val model = ALS.train(ratings, rank, numIterations, 0.01)
+// Evaluate the model on rating data
+val usersProducts = ratings.map { case Rating(user, product, rate) =>
+  (user, product)
+}
+val predictions =
+  model.predict(usersProducts).map { case Rating(user, product, rate) =>
+    ((user, product), rate)
+  }
+val ratesAndPreds = ratings.map { case Rating(user, product, rate) =>
+  ((user, product), rate)
+}.join(predictions)
+val MSE = ratesAndPreds.map { case ((user, product), (r1, r2)) =>
+  val err = (r1 - r2)
+  err * err
+}.mean()
+println("Mean Squared Error = " + MSE)
+
+
+
+
+
+
+joinBusiness.coalesce(1).saveAsTextFile("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/data/item.txt")
+
+
+val Array(trainingData,testData) = ratings.randomSplit(Array(0.80, 0.20))
+
+
+
+val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd.map(row => row.toString))
+
+val optimize_business_rdd = optimize_business.rdd.map(x => x(0).toString()).distinct().zipWithIndex()
+
+Code for Neighborhood model
+package Project.Project;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.mahout.*;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
+import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
+import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+
+public class Neighbourhood {
+	public static void main(String[] args) {
+	        //user id for which we need recommendations
+	        long userid = 574434;
+	        //number of recommendations needed
+	        int recommendationsno = 5;
+	        try {
+	        	//creation of a data model from the input file
+	            FileDataModel fileDataModel = new FileDataModel(new File("C:\\Users\\rametta\\Downloads\\dataInFormat.txt"));
+	            //defining a notion of similarity between two users
+	            UserSimilarity userRatingSimilarity = new PearsonCorrelationSimilarity(fileDataModel);
+	            //finding 100 nearest neighbors
+	            UserNeighborhood userCalcNeighborhood = new NearestNUserNeighborhood(50, userRatingSimilarity, fileDataModel);
+	            //creating a recommender from the given data model and user similarity
+	            Recommender recommender = new GenericUserBasedRecommender(fileDataModel, userCalcNeighborhood, userRatingSimilarity);
+	            //generating recommendations from the recommender
+	            List<RecommendedItem> finalUserRecommendationsMade = recommender.recommend(userid, recommendationsno);
+	            //iterating through the recommendations
+	            for (RecommendedItem toUserRecommendedItem : finalUserRecommendationsMade) {
+	                System.out.println(toUserRecommendedItem.getItemID());
+	            }
+	        } catch (IOException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	        } catch (TasteException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	        }
+	    }
+}
+
+
+

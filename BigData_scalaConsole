@@ -1,0 +1,736 @@
+Sai-Vamsis-MacBook-Pro:~ saivamsimuvva$ cd /Users/saivamsimuvva/Documents/spark-2.1.0-bin-hadoop2.7
+Sai-Vamsis-MacBook-Pro:spark-2.1.0-bin-hadoop2.7 saivamsimuvva$ 
+Sai-Vamsis-MacBook-Pro:spark-2.1.0-bin-hadoop2.7 saivamsimuvva$ ./bin/spark-shell
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+17/04/23 19:17:45 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+17/04/23 19:18:01 WARN ObjectStore: Failed to get database global_temp, returning NoSuchObjectException
+Spark context Web UI available at http://192.168.0.25:4040
+Spark context available as 'sc' (master = local[*], app id = local-1492993071559).
+Spark session available as 'spark'.
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 2.1.0
+      /_/
+         
+Using Scala version 2.11.8 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_121)
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> val reviewDataset = spark.read.json("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/yelp_academic_dataset_review.json")
+reviewDataset: org.apache.spark.sql.DataFrame = [business_id: string, cool: bigint ... 8 more fields]
+
+scala> reviewDataset.createOrReplaceTempView("reviews")
+
+scala> val optimize_reviews = spark.sql("SELECT user_id,business_id,stars FROM reviews")
+optimize_reviews: org.apache.spark.sql.DataFrame = [user_id: string, business_id: string ... 1 more field]
+
+scala> val userDataset = spark.read.json("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/yelp_academic_dataset_user.json")
+userDataset: org.apache.spark.sql.DataFrame = [average_stars: double, compliment_cool: bigint ... 21 more fields]
+
+scala> userDataset.createOrReplaceTempView("users")
+
+scala> val optimize_users = spark.sql("SELECT user_id FROM users")
+optimize_users: org.apache.spark.sql.DataFrame = [user_id: string]
+
+scala> val businessDataset = spark.read.json("/Users/saivamsimuvva/Downloads/yelp_dataset_challenge_round9/yelp_academic_dataset_business.json")
+businessDataset: org.apache.spark.sql.DataFrame = [address: string, attributes: array<string> ... 14 more fields]
+
+scala> businessDataset.createOrReplaceTempView("business")
+
+scala> val optimize_business = spark.sql("SELECT business_id FROM business")
+optimize_business: org.apache.spark.sql.DataFrame = [business_id: string]
+
+scala> optimize_business
+res3: org.apache.spark.sql.DataFrame = [business_id: string]
+
+scala> optimize_business.show()
++--------------------+
+|         business_id|
++--------------------+
+|0DI8Dt2PJp07XkVvI...|
+|LTlCaCGZE14GuaUXU...|
+|EDqCEAGXVGCH4FJXg...|
+|cnGIivYRLxpF7tBVR...|
+|cdk-qqJ71q6P7TJTw...|
+|Q9rsaUiQ-A3NdEAlo...|
+|Cu4_Fheh7IrzGiK-P...|
+|GDnbt3isfhd57T1Qq...|
+|qwAHit4Tuj1zpO7Cx...|
+|Nbr0kbtIrVlEcKIZo...|
+|MFneYHieJ_lnjMeFU...|
+|42romV8altAeuZuP2...|
+|iaunX_af5M5lfT2eE...|
+|Tc24GX9-ZPr4_SHU0...|
+|6EvETd9FVPJfhT_6A...|
+|DSWsjtAfLYw9a4MTz...|
+|SbfEPi-iR4ntf3wRQ...|
+|YCsLfBVdLFeN2Necw...|
+|O_4OTnw48ULP5uZh6...|
+|CE0dABv9sfrXjDIJu...|
++--------------------+
+only showing top 20 rows
+
+
+scala> optimize_users.show()
++--------------------+
+|             user_id|
++--------------------+
+|EZmocAborM6z66rTz...|
+|myql3o3x22_ygECb8...|
+|FIk4lQQu1eTe2EpzQ...|
+|ojovtd9c8GIeDiB8e...|
+|uVEoZmmL9yK0NMgad...|
+|TprC8sujz8Mkwuomr...|
+|De-dImXf-TOFWWPTU...|
+|vWXDkGEvICWNCjBW_...|
+|JMTr179r5SGHC_rPU...|
+|s7XIFcwZnhEUMzSZ4...|
+|_NizT4NfEXZP466x8...|
+|tjmqE-70kkNO3oadB...|
+|wX6V7MHpgcBPVK0x5...|
+|cTABik0Qu7WrPTElR...|
+|1uVmN3vSvxCrxijXF...|
+|CK-W4WhlmLKOZF-50...|
+|D4NgI92ya7zoCeXnL...|
+|WKbdS0LlutPPBOcb8...|
+|CXr8GYakp_MJce6Va...|
+|rbRYymshJoneJQv4E...|
++--------------------+
+only showing top 20 rows
+
+
+scala> optimize_reviews
+res6: org.apache.spark.sql.DataFrame = [user_id: string, business_id: string ... 1 more field]
+
+scala> optimize_reviews.show()
++--------------------+--------------------+-----+
+|             user_id|         business_id|stars|
++--------------------+--------------------+-----+
+|KpkOkG6RIf4Ra25Lh...|2aFiy99vNLklCx3T_...|    5|
+|bQ7fQq1otn9hKX-gX...|2aFiy99vNLklCx3T_...|    5|
+|r1NUhdNmL6yU9Bn-Y...|2aFiy99vNLklCx3T_...|    5|
+|aW3ix1KNZAvoM8q-W...|2LfIuF3_sX6uwe-IR...|    5|
+|YOo-Cip8HqvKp_p9n...|2LfIuF3_sX6uwe-IR...|    4|
+|bgl3j8yJcRO-00NkU...|2LfIuF3_sX6uwe-IR...|    5|
+|CWKF9de-nskLYEqDD...|2LfIuF3_sX6uwe-IR...|    4|
+|GJ7PTY7huYORFKKg3...|2LfIuF3_sX6uwe-IR...|    5|
+|rxqp9eXZj1jYTn0UI...|2LfIuF3_sX6uwe-IR...|    5|
+|UU0nHQtHPMAfLidk8...|2LfIuF3_sX6uwe-IR...|    5|
+|A_Hyfk3FcwFVIk1CQ...|2LfIuF3_sX6uwe-IR...|    1|
+|OvD92wp0-uuFoGLBy...|2LfIuF3_sX6uwe-IR...|    5|
+|5NDk-q5mv8PIDvz83...|2LfIuF3_sX6uwe-IR...|    4|
+|AziQIgYIAY6uVw1k8...|2LfIuF3_sX6uwe-IR...|    5|
+|A65IYKs3FwsyyJH20...|2LfIuF3_sX6uwe-IR...|    5|
+|wnzfuir72IZFg5RAP...|2LfIuF3_sX6uwe-IR...|    1|
+|2N9wrn5A37aOXDrBP...|2LfIuF3_sX6uwe-IR...|    4|
+|oKZiDLm0D1PIm1-vR...|2LfIuF3_sX6uwe-IR...|    5|
+|XMRkVYpQAZpWOpia5...|0czfEgv9KAD4VlIa7...|    1|
+|jhhHm3Vk9ZlP21WdY...|0czfEgv9KAD4VlIa7...|    5|
++--------------------+--------------------+-----+
+only showing top 20 rows
+
+
+scala> val r1 = sc.parallelize(optimize_business)
+<console>:26: error: type mismatch;
+ found   : org.apache.spark.sql.DataFrame
+    (which expands to)  org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]
+ required: Seq[?]
+Error occurred in an application involving default arguments.
+       val r1 = sc.parallelize(optimize_business)
+                               ^
+
+scala> val r1 = sc.parallelize(optimize_business.rdd)
+<console>:26: error: type mismatch;
+ found   : org.apache.spark.rdd.RDD[org.apache.spark.sql.Row]
+ required: Seq[?]
+Error occurred in an application involving default arguments.
+       val r1 = sc.parallelize(optimize_business.rdd)
+                                                 ^
+
+scala> val optimize_business_rdd = optimize_business.rdd.zipWithIndex()
+optimize_business_rdd: org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Long)] = ZippedWithIndexRDD[25] at zipWithIndex at <console>:25
+
+scala> optimize_business_rdd.take(10).foreach(println)
+([0DI8Dt2PJp07XkVvIElIcQ],0)
+([LTlCaCGZE14GuaUXUGbamg],1)
+([EDqCEAGXVGCH4FJXgqtjqg],2)
+([cnGIivYRLxpF7tBVR_JwWA],3)
+([cdk-qqJ71q6P7TJTww_DSA],4)
+([Q9rsaUiQ-A3NdEAloy0aJA],5)
+([Cu4_Fheh7IrzGiK-Pc79ig],6)
+([GDnbt3isfhd57T1QqU6flg],7)
+([qwAHit4Tuj1zpO7CxVwOMA],8)
+([Nbr0kbtIrVlEcKIZoXWbSw],9)
+
+scala> optimize_business_rdd
+res9: org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Long)] = ZippedWithIndexRDD[25] at zipWithIndex at <console>:25
+
+scala> val optimize_users_rdd = optimize_users.rdd.zipWithIndex()
+optimize_users_rdd: org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Long)] = ZippedWithIndexRDD[30] at zipWithIndex at <console>:25
+
+scala> val optimize_users_rdd = optimize_users.rdd.distinct.zipWithIndex()
+optimize_users_rdd: org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Long)] = ZippedWithIndexRDD[34] at zipWithIndex at <console>:25
+
+scala> optimize_users_rdd.take(10).foreach(println)
+17/04/23 20:07:40 WARN Executor: Managed memory leak detected; size = 41437406 bytes, TID = 176
+([aEsJe_Tj5G18w2qetIUDOA],0)
+([GPAloEQ368SHR9eECXxmIA],1)
+([NpNYZXhwGoCXr_8gUX-Xkg],2)
+([tgE1070LoxPTeVoyq0yUrA],3)
+([Qv5Yg2BKSBuY620h_tQfYw],4)
+([6ePAz6IcpTeyQeZYHHITzQ],5)
+([QcA7zhJK9VckjkOVjPflEw],6)
+([5qAQt0mFuM8uWmymF-6iPQ],7)
+([oZe4JVFROATniInAxBu0HA],8)
+([EQgQtMJLGjGKoV04DY_SFw],9)
+
+scala> val optimize_business_rdd = optimize_business.rdd.distinct.zipWithIndex()
+optimize_business_rdd: org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Long)] = ZippedWithIndexRDD[38] at zipWithIndex at <console>:25
+
+scala> val optimize_business_rdd = optimize_business.rdd.distinct().zipWithIndex()
+optimize_business_rdd: org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Long)] = ZippedWithIndexRDD[42] at zipWithIndex at <console>:25
+
+scala> val optimize_business_rdd = optimize_business.rdd.map(_.business_id).distinct().zipWithIndex()
+<console>:25: error: value business_id is not a member of org.apache.spark.sql.Row
+       val optimize_business_rdd = optimize_business.rdd.map(_.business_id).distinct().zipWithIndex()
+                                                               ^
+
+scala> optimize_business
+res11: org.apache.spark.sql.DataFrame = [business_id: string]
+
+scala> optimize_business.show()
++--------------------+
+|         business_id|
++--------------------+
+|0DI8Dt2PJp07XkVvI...|
+|LTlCaCGZE14GuaUXU...|
+|EDqCEAGXVGCH4FJXg...|
+|cnGIivYRLxpF7tBVR...|
+|cdk-qqJ71q6P7TJTw...|
+|Q9rsaUiQ-A3NdEAlo...|
+|Cu4_Fheh7IrzGiK-P...|
+|GDnbt3isfhd57T1Qq...|
+|qwAHit4Tuj1zpO7Cx...|
+|Nbr0kbtIrVlEcKIZo...|
+|MFneYHieJ_lnjMeFU...|
+|42romV8altAeuZuP2...|
+|iaunX_af5M5lfT2eE...|
+|Tc24GX9-ZPr4_SHU0...|
+|6EvETd9FVPJfhT_6A...|
+|DSWsjtAfLYw9a4MTz...|
+|SbfEPi-iR4ntf3wRQ...|
+|YCsLfBVdLFeN2Necw...|
+|O_4OTnw48ULP5uZh6...|
+|CE0dABv9sfrXjDIJu...|
++--------------------+
+only showing top 20 rows
+
+
+scala> val optimize_business_rdd = optimize_business.rdd.map(_.business_id).distinct().zipWithUniqueId()
+<console>:25: error: value business_id is not a member of org.apache.spark.sql.Row
+       val optimize_business_rdd = optimize_business.rdd.map(_.business_id).distinct().zipWithUniqueId()
+                                                               ^
+
+scala> val optimize_business_rdd = optimize_business.rdd.map(x => x(0)).distinct().zipWithUniqueId()
+optimize_business_rdd: org.apache.spark.rdd.RDD[(Any, Long)] = MapPartitionsRDD[50] at zipWithUniqueId at <console>:25
+
+scala> val optimize_business_rdd = optimize_business.rdd.map(x => x(0).toString()).distinct().zipWithUniqueId()
+optimize_business_rdd: org.apache.spark.rdd.RDD[(String, Long)] = MapPartitionsRDD[55] at zipWithUniqueId at <console>:25
+
+scala> optimize_business_rdd.take(10).foreach(println)
+(ObelBwE40B5oYm2aA8yTjw,0)                                                      
+(w2sb3HuTzO_BuOJ5AinbNg,4)
+(ydj6cSmcOM_jVYJLkHzdOA,8)
+(lrPNLw0zbfzgWrWINMjsNw,12)
+(4z-RHRpCCv77fJ2ZzatI4Q,16)
+(JuHGQlSMMo4IFD5eM_eKaQ,20)
+(rzByiKaj-bLeLz-zKNBQdg,24)
+(yQpQirRKT5QJzbSyyT4mHA,28)
+(Hr_Bk65xD2yQxjJhhorH1g,32)
+(3PsmvwxetLz1Tzb-6mNhgA,36)
+
+scala> val optimize_business_rdd = optimize_business.rdd.map(x => x(0).toString()).distinct().zipWithIndex()
+optimize_business_rdd: org.apache.spark.rdd.RDD[(String, Long)] = ZippedWithIndexRDD[60] at zipWithIndex at <console>:25
+
+scala> optimize_business_rdd.take(10).foreach(println)
+(ObelBwE40B5oYm2aA8yTjw,0)
+(w2sb3HuTzO_BuOJ5AinbNg,1)
+(ydj6cSmcOM_jVYJLkHzdOA,2)
+(lrPNLw0zbfzgWrWINMjsNw,3)
+(4z-RHRpCCv77fJ2ZzatI4Q,4)
+(JuHGQlSMMo4IFD5eM_eKaQ,5)
+(rzByiKaj-bLeLz-zKNBQdg,6)
+(yQpQirRKT5QJzbSyyT4mHA,7)
+(Hr_Bk65xD2yQxjJhhorH1g,8)
+(3PsmvwxetLz1Tzb-6mNhgA,9)
+
+scala> val optimize_users_rdd = optimize_users.rdd.map(x => x(0).toString()).distinct.zipWithIndex()
+optimize_users_rdd: org.apache.spark.rdd.RDD[(String, Long)] = ZippedWithIndexRDD[65] at zipWithIndex at <console>:25
+
+scala> val optimize_users_rdd = optimize_users.rdd.map(x => x(0).toString()).distinct().zipWithIndex()
+optimize_users_rdd: org.apache.spark.rdd.RDD[(String, Long)] = ZippedWithIndexRDD[70] at zipWithIndex at <console>:25
+
+scala> optimize_users_rdd.take(10).foreach(println)
+17/04/23 20:31:27 WARN Executor: Managed memory leak detected; size = 5273718 bytes, TID = 239
+(LmeI8OfAWasUwcFNpsdpNQ,0)
+(Qb13kspGBvnYUsPsGmbkbg,1)
+(iAUmu2PTiY6_Dp7GFD33Uw,2)
+(Zd7pPlKVPxRuX25925DSVw,3)
+(DuTNotPWhYWb5Dpt-UAmlA,4)
+(xsvyB1aNlIs-xh_3yRdB2g,5)
+(HyIkHUWPAusP5zE2OtWAew,6)
+(vb4t8TYs_cHjI-6xJDpWvA,7)
+(xTlqpuuqtO0FWs12gd1v6A,8)
+(Q8KxySMZlju4M0juKe1OKA,9)
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd)
+<console>:29: error: value user_id is not a member of org.apache.spark.sql.Row
+       val joinUser = optimize_reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd)
+                                                   ^
+<console>:29: error: value join is not a member of org.apache.spark.rdd.RDD[(K, org.apache.spark.sql.Row)]
+       val joinUser = optimize_reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd)
+                                                            ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0)).join(optimize_users_rdd)
+<console>:29: error: type mismatch;
+ found   : Int(0)
+ required: String
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0)).join(optimize_users_rdd)
+                                                                  ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0).getString()).join(optimize_users_rdd)
+<console>:29: error: type mismatch;
+ found   : Int(0)
+ required: String
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0).getString()).join(optimize_users_rdd)
+                                                                  ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(user_id).getString()).join(optimize_users_rdd)
+<console>:29: error: not found: value user_id
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(user_id).getString()).join(optimize_users_rdd)
+                                                                  ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0).getString(0)).join(optimize_users_rdd)
+<console>:29: error: type mismatch;
+ found   : Int(0)
+ required: String
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0).getString(0)).join(optimize_users_rdd)
+                                                                  ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews.getString(0)).join(optimize_users_rdd)
+<console>:29: error: value getString is not a member of org.apache.spark.sql.DataFrame
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews.getString(0)).join(optimize_users_rdd)
+                                                                  ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0).getString(0)).join(optimize_users_rdd)
+<console>:29: error: type mismatch;
+ found   : Int(0)
+ required: String
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0).getString(0)).join(optimize_users_rdd)
+                                                                  ^
+
+scala> val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0)).join(optimize_users_rdd)
+<console>:29: error: type mismatch;
+ found   : Int(0)
+ required: String
+       val joinUser = optimize_reviews.rdd.keyBy(optimize_reviews(0)).join(optimize_users_rdd)
+                                                                  ^
+
+scala> optimize_reviews.showSchema()
+<console>:26: error: value showSchema is not a member of org.apache.spark.sql.DataFrame
+       optimize_reviews.showSchema()
+                        ^
+
+scala> optimize_reviews.printSchema()
+root
+ |-- user_id: string (nullable = true)
+ |-- business_id: string (nullable = true)
+ |-- stars: long (nullable = true)
+
+
+scala> optimize_reviews
+res18: org.apache.spark.sql.DataFrame = [user_id: string, business_id: string ... 1 more field]
+
+scala> case class MyRating(userId: String, restId: String, stars: Long)
+defined class MyRating
+
+scala> val optimize_reviews = optimize_reviews.map(ratings=>MyRating(ratings.getString(0),ratings.getString(1),ratings.getLong(2)))
+<console>:27: error: recursive value optimize_reviews needs type
+       val optimize_reviews = optimize_reviews.map(ratings=>MyRating(ratings.getString(0),ratings.getString(1),ratings.getLong(2)))
+                              ^
+
+scala> val reviews = optimize_reviews.map(ratings=>MyRating(ratings.getString(0),ratings.getString(1),ratings.getLong(2)))
+reviews: org.apache.spark.sql.Dataset[MyRating] = [userId: string, restId: string ... 1 more field]
+
+scala> reviews.show()
++--------------------+--------------------+-----+
+|              userId|              restId|stars|
++--------------------+--------------------+-----+
+|KpkOkG6RIf4Ra25Lh...|2aFiy99vNLklCx3T_...|    5|
+|bQ7fQq1otn9hKX-gX...|2aFiy99vNLklCx3T_...|    5|
+|r1NUhdNmL6yU9Bn-Y...|2aFiy99vNLklCx3T_...|    5|
+|aW3ix1KNZAvoM8q-W...|2LfIuF3_sX6uwe-IR...|    5|
+|YOo-Cip8HqvKp_p9n...|2LfIuF3_sX6uwe-IR...|    4|
+|bgl3j8yJcRO-00NkU...|2LfIuF3_sX6uwe-IR...|    5|
+|CWKF9de-nskLYEqDD...|2LfIuF3_sX6uwe-IR...|    4|
+|GJ7PTY7huYORFKKg3...|2LfIuF3_sX6uwe-IR...|    5|
+|rxqp9eXZj1jYTn0UI...|2LfIuF3_sX6uwe-IR...|    5|
+|UU0nHQtHPMAfLidk8...|2LfIuF3_sX6uwe-IR...|    5|
+|A_Hyfk3FcwFVIk1CQ...|2LfIuF3_sX6uwe-IR...|    1|
+|OvD92wp0-uuFoGLBy...|2LfIuF3_sX6uwe-IR...|    5|
+|5NDk-q5mv8PIDvz83...|2LfIuF3_sX6uwe-IR...|    4|
+|AziQIgYIAY6uVw1k8...|2LfIuF3_sX6uwe-IR...|    5|
+|A65IYKs3FwsyyJH20...|2LfIuF3_sX6uwe-IR...|    5|
+|wnzfuir72IZFg5RAP...|2LfIuF3_sX6uwe-IR...|    1|
+|2N9wrn5A37aOXDrBP...|2LfIuF3_sX6uwe-IR...|    4|
+|oKZiDLm0D1PIm1-vR...|2LfIuF3_sX6uwe-IR...|    5|
+|XMRkVYpQAZpWOpia5...|0czfEgv9KAD4VlIa7...|    1|
+|jhhHm3Vk9ZlP21WdY...|0czfEgv9KAD4VlIa7...|    5|
++--------------------+--------------------+-----+
+only showing top 20 rows
+
+
+scala> val joinUser = reviews.rdd.keyBy(_.userId).join(optimize_users_rdd)
+joinUser: org.apache.spark.rdd.RDD[(String, (MyRating, Long))] = MapPartitionsRDD[82] at join at <console>:33
+
+scala> joinUser.show()
+<console>:36: error: value show is not a member of org.apache.spark.rdd.RDD[(String, (MyRating, Long))]
+       joinUser.show()
+                ^
+
+scala> joinUser.take(10).foreach(println)
+[Stage 33:=====================================================>  (25 + 1) / 26]17/04/23 20:46:02 WARN Executor: Managed memory leak detected; size = 37483716 bytes, TID = 276
+(2H00ld_x9ICKt2cK3KigVA,(MyRating(2H00ld_x9ICKt2cK3KigVA,FXiPQQGr_2bwlJ4wOrW2eA,4),171178))
+(AaNEhorLm4Em4r7foh7dMA,(MyRating(AaNEhorLm4Em4r7foh7dMA,49RC6OaB3LUo9-7UvAVrfg,4),743568))
+(AaNEhorLm4Em4r7foh7dMA,(MyRating(AaNEhorLm4Em4r7foh7dMA,Js2d71NfJtKtD7hb3kw-qg,1),743568))
+(AaNEhorLm4Em4r7foh7dMA,(MyRating(AaNEhorLm4Em4r7foh7dMA,sX4qTaR_JBt3DMUUKjzQQg,4),743568))
+(XCZ0W9gDkKlBgaAxcxLURg,(MyRating(XCZ0W9gDkKlBgaAxcxLURg,cYwJA2A6I12KNkm2rtXd5g,5),686407))
+(ubmLquQWtGKqw8-5p3EAtw,(MyRating(ubmLquQWtGKqw8-5p3EAtw,gG9z6zr_49LocyCTvSFg0w,4),342794))
+(jD41UEXv-B08pnte1semNw,(MyRating(jD41UEXv-B08pnte1semNw,HI6af2H4gZyXszxfYsuloQ,1),542661))
+(jD41UEXv-B08pnte1semNw,(MyRating(jD41UEXv-B08pnte1semNw,vHlF8VSkELv6nKz5W4GDnw,4),542661))
+(jD41UEXv-B08pnte1semNw,(MyRating(jD41UEXv-B08pnte1semNw,fJqY-E3adwx7LLozV1TfFA,5),542661))
+(HtU_oHSLpYsM3CmDaGe4Nw,(MyRating(HtU_oHSLpYsM3CmDaGe4Nw,Pa1k4iQfglrG6sTcDSKSQw,1),886360))
+
+scala> case class review_row(user_id: String, business_id: String, stars: Long)
+defined class review_row
+
+scala> val reviews = optimize_reviews.map(r=>review_row(r.getString(0),r.getString(1),r.getLong(2)))
+reviews: org.apache.spark.sql.Dataset[review_row] = [user_id: string, business_id: string ... 1 more field]
+
+scala> reviews.show()
++--------------------+--------------------+-----+
+|             user_id|         business_id|stars|
++--------------------+--------------------+-----+
+|KpkOkG6RIf4Ra25Lh...|2aFiy99vNLklCx3T_...|    5|
+|bQ7fQq1otn9hKX-gX...|2aFiy99vNLklCx3T_...|    5|
+|r1NUhdNmL6yU9Bn-Y...|2aFiy99vNLklCx3T_...|    5|
+|aW3ix1KNZAvoM8q-W...|2LfIuF3_sX6uwe-IR...|    5|
+|YOo-Cip8HqvKp_p9n...|2LfIuF3_sX6uwe-IR...|    4|
+|bgl3j8yJcRO-00NkU...|2LfIuF3_sX6uwe-IR...|    5|
+|CWKF9de-nskLYEqDD...|2LfIuF3_sX6uwe-IR...|    4|
+|GJ7PTY7huYORFKKg3...|2LfIuF3_sX6uwe-IR...|    5|
+|rxqp9eXZj1jYTn0UI...|2LfIuF3_sX6uwe-IR...|    5|
+|UU0nHQtHPMAfLidk8...|2LfIuF3_sX6uwe-IR...|    5|
+|A_Hyfk3FcwFVIk1CQ...|2LfIuF3_sX6uwe-IR...|    1|
+|OvD92wp0-uuFoGLBy...|2LfIuF3_sX6uwe-IR...|    5|
+|5NDk-q5mv8PIDvz83...|2LfIuF3_sX6uwe-IR...|    4|
+|AziQIgYIAY6uVw1k8...|2LfIuF3_sX6uwe-IR...|    5|
+|A65IYKs3FwsyyJH20...|2LfIuF3_sX6uwe-IR...|    5|
+|wnzfuir72IZFg5RAP...|2LfIuF3_sX6uwe-IR...|    1|
+|2N9wrn5A37aOXDrBP...|2LfIuF3_sX6uwe-IR...|    4|
+|oKZiDLm0D1PIm1-vR...|2LfIuF3_sX6uwe-IR...|    5|
+|XMRkVYpQAZpWOpia5...|0czfEgv9KAD4VlIa7...|    1|
+|jhhHm3Vk9ZlP21WdY...|0czfEgv9KAD4VlIa7...|    5|
++--------------------+--------------------+-----+
+only showing top 20 rows
+
+
+scala> val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd)
+joinUser: org.apache.spark.rdd.RDD[(String, (review_row, Long))] = MapPartitionsRDD[94] at join at <console>:33
+
+scala> joinUser.take(10).foreach(println)
+[Stage 36:=====================================================>  (25 + 1) / 26]17/04/23 21:11:13 WARN Executor: Managed memory leak detected; size = 37483716 bytes, TID = 313
+(2H00ld_x9ICKt2cK3KigVA,(review_row(2H00ld_x9ICKt2cK3KigVA,FXiPQQGr_2bwlJ4wOrW2eA,4),171178))
+(AaNEhorLm4Em4r7foh7dMA,(review_row(AaNEhorLm4Em4r7foh7dMA,49RC6OaB3LUo9-7UvAVrfg,4),743568))
+(AaNEhorLm4Em4r7foh7dMA,(review_row(AaNEhorLm4Em4r7foh7dMA,Js2d71NfJtKtD7hb3kw-qg,1),743568))
+(AaNEhorLm4Em4r7foh7dMA,(review_row(AaNEhorLm4Em4r7foh7dMA,sX4qTaR_JBt3DMUUKjzQQg,4),743568))
+(XCZ0W9gDkKlBgaAxcxLURg,(review_row(XCZ0W9gDkKlBgaAxcxLURg,cYwJA2A6I12KNkm2rtXd5g,5),686407))
+(ubmLquQWtGKqw8-5p3EAtw,(review_row(ubmLquQWtGKqw8-5p3EAtw,gG9z6zr_49LocyCTvSFg0w,4),342794))
+(jD41UEXv-B08pnte1semNw,(review_row(jD41UEXv-B08pnte1semNw,HI6af2H4gZyXszxfYsuloQ,1),542661))
+(jD41UEXv-B08pnte1semNw,(review_row(jD41UEXv-B08pnte1semNw,vHlF8VSkELv6nKz5W4GDnw,4),542661))
+(jD41UEXv-B08pnte1semNw,(review_row(jD41UEXv-B08pnte1semNw,fJqY-E3adwx7LLozV1TfFA,5),542661))
+(HtU_oHSLpYsM3CmDaGe4Nw,(review_row(HtU_oHSLpYsM3CmDaGe4Nw,Pa1k4iQfglrG6sTcDSKSQw,1),886360))
+
+scala> val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._3,r._2._2,r._2._3))
+<console>:33: error: value _3 is not a member of (String, (review_row, Long))
+       val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._3,r._2._2,r._2._3))
+                                                                                        ^
+<console>:33: error: value _3 is not a member of (review_row, Long)
+       val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._3,r._2._2,r._2._3))
+                                                                                                        ^
+
+scala> val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._2._1._2,r._2._1._3,r._2._2))
+<console>:33: error: value _2 is not a member of review_row
+       val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._2._1._2,r._2._1._3,r._2._2))
+                                                                                              ^
+<console>:33: error: value _3 is not a member of review_row
+       val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._2._1._2,r._2._1._3,r._2._2))
+                                                                                                         ^
+
+scala> val joinUser = reviews.rdd.keyBy(_.user_id).join(optimize_users_rdd).map(r => (r._2._2,r._2._1.business_id,r._2._1.stars))
+joinUser: org.apache.spark.rdd.RDD[(Long, String, Long)] = MapPartitionsRDD[99] at map at <console>:33
+
+scala> joinUser.take(10).foreach(println)
+[Stage 40:=====================================================>  (25 + 1) / 26]17/04/23 21:21:53 WARN Executor: Managed memory leak detected; size = 37483716 bytes, TID = 349
+(171178,FXiPQQGr_2bwlJ4wOrW2eA,4)                                               
+(743568,49RC6OaB3LUo9-7UvAVrfg,4)
+(743568,Js2d71NfJtKtD7hb3kw-qg,1)
+(743568,sX4qTaR_JBt3DMUUKjzQQg,4)
+(686407,cYwJA2A6I12KNkm2rtXd5g,5)
+(342794,gG9z6zr_49LocyCTvSFg0w,4)
+(542661,HI6af2H4gZyXszxfYsuloQ,1)
+(542661,vHlF8VSkELv6nKz5W4GDnw,4)
+(542661,fJqY-E3adwx7LLozV1TfFA,5)
+(886360,Pa1k4iQfglrG6sTcDSKSQw,1)
+
+scala> val joinUser = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+<console>:39: error: recursive value joinUser needs type
+       val joinUser = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+                      ^
+
+scala> val joinBusiness = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+<console>:39: error: value business_id is not a member of (Long, String, Long)
+       val joinBusiness = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+                                           ^
+<console>:39: error: value join is not a member of org.apache.spark.rdd.RDD[(K, (Long, String, Long))]
+       val joinBusiness = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+                                                        ^
+
+scala> joinUser
+res25: org.apache.spark.rdd.RDD[(Long, String, Long)] = MapPartitionsRDD[99] at map at <console>:33
+
+scala> val joinBusiness = joinUser.rdd.keyBy(_.business_id).join(optimize_business_rdd)
+<console>:39: error: value rdd is not a member of org.apache.spark.rdd.RDD[(Long, String, Long)]
+       val joinBusiness = joinUser.rdd.keyBy(_.business_id).join(optimize_business_rdd)
+                                   ^
+
+scala> val joinBusiness = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+<console>:39: error: value business_id is not a member of (Long, String, Long)
+       val joinBusiness = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+                                           ^
+<console>:39: error: value join is not a member of org.apache.spark.rdd.RDD[(K, (Long, String, Long))]
+       val joinBusiness = joinUser.keyBy(_.business_id).join(optimize_business_rdd)
+                                                        ^
+
+scala> opt
+optManifest   optimize_business   optimize_business_rdd   optimize_reviews   optimize_users   optimize_users_rdd
+
+scala> optimize_
+optimize_business   optimize_business_rdd   optimize_reviews   optimize_users   optimize_users_rdd
+
+scala> optimize_business
+optimize_business   optimize_business_rdd
+
+scala> optimize_business
+   val optimize_business: org.apache.spark.sql.DataFrame
+
+scala> optimize_business_rdd
+res26: org.apache.spark.rdd.RDD[(String, Long)] = ZippedWithIndexRDD[60] at zipWithIndex at <console>:25
+
+scala> val joinBusiness = joinUser.keyBy(_._2).join(optimize_business_rdd)
+joinBusiness: org.apache.spark.rdd.RDD[(String, ((Long, String, Long), Long))] = MapPartitionsRDD[103] at join at <console>:39
+
+scala> joinBusiness.take(10).foreach(println)
+[Stage 47:===================================================>    (24 + 2) / 26]17/04/23 21:33:23 WARN Executor: Managed memory leak detected; size = 15744000 bytes, TID = 380
+(d0XS2cF_gPQRUte8b0jdvQ,((194845,d0XS2cF_gPQRUte8b0jdvQ,4),22584))              
+(d0XS2cF_gPQRUte8b0jdvQ,((854938,d0XS2cF_gPQRUte8b0jdvQ,5),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((118696,d0XS2cF_gPQRUte8b0jdvQ,4),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((543942,d0XS2cF_gPQRUte8b0jdvQ,3),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((140735,d0XS2cF_gPQRUte8b0jdvQ,4),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((574434,d0XS2cF_gPQRUte8b0jdvQ,3),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((791366,d0XS2cF_gPQRUte8b0jdvQ,4),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((796675,d0XS2cF_gPQRUte8b0jdvQ,5),22584))
+(d0XS2cF_gPQRUte8b0jdvQ,((618277,d0XS2cF_gPQRUte8b0jdvQ,2),22584))
+(FqQcDCC-wfZgkcx5hwGFrg,((614115,FqQcDCC-wfZgkcx5hwGFrg,5),72078))
+
+scala> val joinBusiness = joinUser.keyBy(_._2).join(optimize_business_rdd).map(r=>(r._2._1._1,r._2._2,r._2._1._3))
+joinBusiness: org.apache.spark.rdd.RDD[(Long, Long, Long)] = MapPartitionsRDD[108] at map at <console>:39
+
+scala> joinBusiness.take(10).f
+filter   filterNot   find   flatMap   flatten   fold   foldLeft   foldRight   forall   foreach   formatted
+
+scala> joinBusiness.take(10).foreach(println)
+[Stage 56:===================================================>    (24 + 2) / 26]17/04/23 21:38:44 WARN Executor: Managed memory leak detected; size = 15744000 bytes, TID = 411
+(194845,22584,4)                                                                
+(854938,22584,5)
+(118696,22584,4)
+(543942,22584,3)
+(140735,22584,4)
+(574434,22584,3)
+(791366,22584,4)
+(796675,22584,5)
+(618277,22584,2)
+(614115,72078,5)
+
+scala> import org.apache.spark.mllib.recommendation.ALS
+import org.apache.spark.mllib.recommendation.ALS
+
+scala> import org.apache.spark.mllib.recommendation.MatrixFactorizationModel
+import org.apache.spark.mllib.recommendation.MatrixFactorizationModel
+
+scala> import org.apache.spark.mllib.recommendation.Rating
+import org.apache.spark.mllib.recommendation.Rating
+
+scala> val ratings = data.map(r => Rating(r._1.toInt, r._2.toInt, r._3.toDouble))
+<console>:26: error: not found: value data
+       val ratings = data.map(r => Rating(r._1.toInt, r._2.toInt, r._3.toDouble))
+                     ^
+
+scala> val ratings = joinBusiness.map(r => Rating(r._1.toInt, r._2.toInt, r._3.toDouble))
+ratings: org.apache.spark.rdd.RDD[org.apache.spark.mllib.recommendation.Rating] = MapPartitionsRDD[109] at map at <console>:44
+
+scala> ratings.take(10).foreach(println)
+17/04/23 21:42:57 WARN Executor: Managed memory leak detected; size = 15744000 bytes, TID = 412
+Rating(194845,22584,4.0)
+Rating(854938,22584,5.0)
+Rating(118696,22584,4.0)
+Rating(543942,22584,3.0)
+Rating(140735,22584,4.0)
+Rating(574434,22584,3.0)
+Rating(791366,22584,4.0)
+Rating(796675,22584,5.0)
+Rating(618277,22584,2.0)
+Rating(614115,72078,5.0)
+
+scala> val rank = 10
+rank: Int = 10
+
+scala> val numIterations = 10
+numIterations: Int = 10
+
+scala> val Array(trainingData,testData) = ratings.randomSplit(Array(0.80, 0.20))
+trainingData: org.apache.spark.rdd.RDD[org.apache.spark.mllib.recommendation.Rating] = MapPartitionsRDD[110] at randomSplit at <console>:46
+testData: org.apache.spark.rdd.RDD[org.apache.spark.mllib.recommendation.Rating] = MapPartitionsRDD[111] at randomSplit at <console>:46
+
+scala> 
+
+scala> val model = ALS.train(trainingData, rank, numIterations, 0.01)
+17/04/23 21:49:29 WARN BLAS: Failed to load implementation from: com.github.fommil.netlib.NativeSystemBLAS
+17/04/23 21:49:29 WARN BLAS: Failed to load implementation from: com.github.fommil.netlib.NativeRefBLAS
+[Stage 92:===========================================>            (10 + 3) / 13]17/04/23 21:49:31 WARN LAPACK: Failed to load implementation from: com.github.fommil.netlib.NativeSystemLAPACK
+17/04/23 21:49:31 WARN LAPACK: Failed to load implementation from: com.github.fommil.netlib.NativeRefLAPACK
+17/04/23 21:50:04 WARN Executor: 1 block locks were not released by TID = 816:  
+[rdd_317_0]
+17/04/23 21:50:04 WARN Executor: 1 block locks were not released by TID = 817:
+[rdd_318_0]
+model: org.apache.spark.mllib.recommendation.MatrixFactorizationModel = org.apache.spark.mllib.recommendation.MatrixFactorizationModel@41775525
+
+scala> val usersProducts = testData.map { case Rating(user, product, rate) => (user, product)}
+usersProducts: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[319] at map at <console>:28
+
+scala> val predictions = model.predict(usersProducts).map { case Rating(user, product, rate) => ((user, product), rate)}
+predictions: org.apache.spark.rdd.RDD[((Int, Int), Double)] = MapPartitionsRDD[329] at map at <console>:37
+
+scala> val ratesAndPreds = trainingData.map { case Rating(user, product, rate) =>
+     |   ((user, product), rate)
+     | }.join(predictions)
+ratesAndPreds: org.apache.spark.rdd.RDD[((Int, Int), (Double, Double))] = MapPartitionsRDD[333] at join at <console>:41
+
+scala> val MSE = ratesAndPreds.map { case ((user, product), (r1, r2)) =>
+     |   val err = (r1 - r2)
+     |   err * err
+     | }.mean()
+MSE: Double = 0.0                                                               
+
+scala> predictions
+res30: org.apache.spark.rdd.RDD[((Int, Int), Double)] = MapPartitionsRDD[329] at map at <console>:37
+
+scala> ratesAndPreds.show()
+<console>:42: error: value show is not a member of org.apache.spark.rdd.RDD[((Int, Int), (Double, Double))]
+       ratesAndPreds.show()
+                     ^
+
+scala> ratesAndPreds.take(10).foreach(p)
+package   parquet   percent_rank   pmod   posexplode   pow   predictions   print   printf   println   py4j
+
+scala> ratesAndPreds.take(10).foreach(println)
+                                                                                
+scala> ratesAndPreds.take(1).foreach(println)
+                                                                                
+scala> predictions.take(10).foreach(println)
+17/04/23 21:59:12 WARN Executor: Managed memory leak detected; size = 16189292 bytes, TID = 1000
+((682981,143242),2.230081107206319)
+((194402,101666),6.373942457792743)
+((101257,123930),3.4620587422366267)
+((101257,49214),1.299874376304704)
+((846729,94072),4.462936107530721)
+((735956,129529),0.8442517955890312)
+((985335,12874),0.7851477982652835)
+((904930,138550),1.340670761364682)
+((720200,97088),5.732847802942211)
+((720200,55401),2.75461128723477)
+
+scala> user
+userDataset   usersProducts
+
+scala> usersProducts.take(10).foreach(println)
+17/04/23 22:01:00 WARN Executor: Managed memory leak detected; size = 15744000 bytes, TID = 1001
+(140735,22584)
+(618277,22584)
+(277308,72078)
+(53483,72078)
+(326889,72078)
+(485886,72078)
+(434269,81166)
+(615735,81166)
+(673507,81166)
+(501888,81166)
+
+scala> val model = ALS.train(ratings, rank, numIterations, 0.01)
+17/04/23 22:06:30 WARN Executor: 1 block locks were not released by TID = 1405: 
+[rdd_541_0]
+17/04/23 22:06:30 WARN Executor: 1 block locks were not released by TID = 1406:
+[rdd_542_0]
+model: org.apache.spark.mllib.recommendation.MatrixFactorizationModel = org.apache.spark.mllib.recommendation.MatrixFactorizationModel@52330b1
+
+scala> 
+
+scala> // Evaluate the model on rating data
+
+scala> val usersProducts = ratings.map { case Rating(user, product, rate) =>
+     |   (user, product)
+     | }
+usersProducts: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[543] at map at <console>:46
+
+scala> val predictions =
+     |   model.predict(usersProducts).map { case Rating(user, product, rate) =>
+     |     ((user, product), rate)
+     |   }
+predictions: org.apache.spark.rdd.RDD[((Int, Int), Double)] = MapPartitionsRDD[553] at map at <console>:55
+
+scala> val ratesAndPreds = ratings.map { case Rating(user, product, rate) =>
+     |   ((user, product), rate)
+     | }.join(predictions)
+ratesAndPreds: org.apache.spark.rdd.RDD[((Int, Int), (Double, Double))] = MapPartitionsRDD[557] at join at <console>:58
+
+scala> val MSE = ratesAndPreds.map { case ((user, product), (r1, r2)) =>
+     |   val err = (r1 - r2)
+     |   err * err
+     | }.mean()
+MSE: Double = 0.22580062365673106                                               
+
+scala> println("Mean Squared Error = " + MSE)
+Mean Squared Error = 0.22580062365673106
+
+scala> 17/04/24 02:34:15 WARN HeartbeatReceiver: Removing executor driver with no recent heartbeats: 3232713 ms exceeds timeout 120000 ms
+17/04/24 02:34:15 ERROR TaskSchedulerImpl: Lost executor driver on localhost: Executor heartbeat timed out after 3232713 ms
+17/04/24 02:34:15 WARN SparkContext: Killing executors is only supported in coarse-grained mode
+
+
+scala> 
+
+scala> 
